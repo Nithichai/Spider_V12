@@ -1,7 +1,7 @@
 from Spider_model_saving import SpiderModelSaving       # use Spider_model_saving
 from Spider_model_showing import SpiderModelShowing     # use Spider_model_showing
-from Spider_model_indexing import SpiderModelIndexing
-from Spider_model_ranking import SpiderModelRanking
+from Spider_model_indexing import SpiderModelIndexing   # use indexing
+from Spider_model_ranking import SpiderModelRanking     # use rank website
 
 
 class SpiderModel:
@@ -10,64 +10,74 @@ class SpiderModel:
         self.saving = SpiderModelSaving()           # use saving model
         self.showing = SpiderModelShowing()         # use showing model
         self.indexing = SpiderModelIndexing()       # use indexing model
-        self.ranking = SpiderModelRanking()
+        self.ranking = SpiderModelRanking()         # use rank website
 
         self.root_website = ""                      # root website
         self.index_website = ""                     # index website
         self.word = ""                              # word that found
 
-        self.content_dict = {}                      # dict of content
-        self.website_dict = {}                      # dict of website
+        self.content_dict = {}                      # dict of content from website
+        self.website_dict = {}                      # dict of child website from websute
         print "complete : init : SpiderModel"
 
+    # method use to clear data in content list and website list
     def reset_data(self):
         print "start : reset_data : SpiderModel"
-        self.content_dict = {}  # dict of content
-        self.website_dict = {}  # dict of website.
+        self.content_dict = {}                      # clear dict of content
+        self.website_dict = {}                      # clear dict of website.
         print "complete : reset_data : SpiderModel"
 
+    # method use to save content, website from HTML
     def save_data_from_html(self):
         print "start : save_data_from_html : SpiderModel"
-        html_code = self.saving.get_html_code(self.index_website)  # get html code
-        data_str = self.saving.get_htmlcode_to_datastr(html_code)  # get data string
+        html_code = self.saving.get_html_code(self.index_website)       # get html code
+        data_str = self.saving.get_htmlcode_to_datastr(html_code)       # get data string
+
         # save content into dict (all content)
         self.content_dict[self.index_website] = self.saving.get_content_from_datastr(data_str) + \
                                                 self.saving.get_weblink_from_datastr(data_str)
+
         # save website into dict
         self.website_dict[self.index_website] = self.saving.get_website_from_datastr(self.root_website, data_str)
         print "complete : save_data_from_html : SpiderModel"
 
+    # save website list , content list into file
     def save_data_to_json(self):
         print "start : save_data_to_json : SpiderModel"
+
         # set dict of json
         json_string = self.saving.get_json_string(self.root_website, self.website_dict, self.content_dict)
+
         # set file name
         json_file_name = self.saving.get_netloc(self.root_website).replace(".", "_") + ".json"
-        json_file = open(json_file_name, "w+")  # start to write file
-        json_file.write(json_string)  # write json in file
-        json_file.close()  # stop to use file
+        json_file = open(json_file_name, "w+")              # start to write file
+        json_file.write(json_string)                        # write json in file
+        json_file.close()                                   # stop to use file
         print "complete : save_data_to_json : SpiderModel"
 
+    # setting graph
     def set_data_to_show(self):
         print "start : set_data_to_show : SpiderModel"
+
         # get file name
         json_file_name = self.saving.get_netloc(self.root_website).replace(".", "_") + ".json"
-        json_file = open(json_file_name, "r+")  # open to read file
-        self.showing.change_json_to_dict(json_file.read())  # set json string to dict
-        self.showing.reset_data()                           # Reset data
-        self.showing.set_into_graph(self.root_website)  # set data to graph
-        self.showing.set_n_used(self.root_website)  # set number of used in dict
-        self.showing.set_n_word_netloc(self.root_website, self.word)  # set number of word in dict (netloc)
-        self.showing.set_n_word_website(self.root_website, self.word)  # set number of word in dict (website)
+        json_file = open(json_file_name, "r+")                  # open to read file
+        self.showing.change_json_to_dict(json_file.read())      # set json string to dict
+        self.showing.reset_data()                               # Reset data
+        self.showing.set_into_graph(self.root_website)          # set data to graph
+        self.showing.set_n_used(self.root_website)                      # set number of used in dict
+        self.showing.set_n_word_netloc(self.root_website, self.word)    # set number of word in dict (netloc)
+        self.showing.set_n_word_website(self.root_website, self.word)   # set number of word in dict (website)
         json_file.close()
         print "complete : set_data_to_show : SpiderModel"
 
+    # indexing
     def make_indexing(self):
         print "start : make_indexing : SpiderModel"
-        self.indexing.set_avoid_word()
-        self.indexing.set_n_used()
-        self.indexing.indexing()
-        self.indexing.save_to_json_file()
+        self.indexing.set_avoid_word()          # set avoid word from file
+        self.indexing.set_n_used()              # set number of website is used
+        self.indexing.indexing()                # indexing
+        self.indexing.save_to_json_file()       # save indexing dict to kson file
         print "complete : make_indexing : SpiderModel"
 
     def get_ranking_dict(self):

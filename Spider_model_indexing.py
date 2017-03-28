@@ -62,40 +62,45 @@ class SpiderModelIndexing:
 
     def set_n_used(self):
         print "start : set_n_used : SpiderModelIndexing"
-        self.dict_n_ref = {}
-        for file_name in os.listdir(os.getcwd()):                   # get file in current file
-            surname_file = file_name[file_name.find(".") + 1:]      # get surname of file
-            if surname_file == "json" and file_name not in self.avoid_file:         # detect python name
-                read_file = open(file_name, "r+")           # read file
-                json_dict = json.loads(read_file.read())    # set json dict
-                for root_website in json_dict:              # get root website
-                    root_website = str(root_website.decode('utf-8'))
-                    for netloc in json_dict[root_website]:  # use netloc in json_dict
-                        netloc = netloc.encode('utf-8').decode('utf-8')  # change unicode to string
-                        for website in json_dict[root_website][netloc]:  # get website in dict
-                            website = website.encode('utf-8')            # change unicode to string
-                            if website not in self.dict_n_ref:
-                                self.dict_n_ref[website] = 0  # set website in dict and set 0
+        self.dict_n_ref = {}                                                # reset dict of n_ref
+        for file_name in os.listdir(os.getcwd()):                           # get file in current file
+            surname_file = file_name[file_name.find(".") + 1:]              # get surname of file
+            if surname_file == "json" and file_name not in self.avoid_file: # detect python name
+                read_file = open(file_name, "r+")                           # read file
+                json_dict = json.loads(read_file.read())                    # set json dict
+                for root_website in json_dict:                              # get root website
+                    root_website = str(root_website.decode('utf-8'))        # change type of string
+                    for netloc in json_dict[root_website]:                  # use netloc in json_dict
+                        netloc = netloc.encode('utf-8').decode('utf-8')     # change unicode to string
+                        for website in json_dict[root_website][netloc]:     # get website in dict
+                            website = website.encode('utf-8')               # change unicode to string
+                            if website not in self.dict_n_ref:              # detect website in dict
+                                self.dict_n_ref[website] = 0                # set website in dict and set 0
+
                             # get child website in list
                             for child_website in json_dict[root_website][netloc][website]["website"]:
                                 child_website = child_website.encode('utf-8')
+
                                 # child website not in dict used
                                 if child_website not in self.dict_n_ref:
-                                    self.dict_n_ref[child_website] = 0  # set website in dict and set 0
+                                    self.dict_n_ref[child_website] = 0      # set website in dict and set 0
+
                                 # child's netloc and website's netloc is not same
                                 child_netloc = self.get_netloc(child_website)
+
+                                # detect child netloc not same website netloc
                                 if child_netloc != netloc:
-                                    self.dict_n_ref[child_website] += 1  # add value in used dict
-                read_file.close()
+                                    self.dict_n_ref[child_website] += 1     # add value in used dict
+                read_file.close()                                           # close file
         print "complete : set_n_used : SpiderModelIndexing"
 
     # save in indexing into string
     def save_to_json_file(self):
         print "start : save_to_json_file : SpiderModelIndexing"
-        json_str = json.dumps(self.indexing_dict)
-        json_file = open("indexing.json", "w+")
-        json_file.write(json_str)
-        json_file.close()
+        json_str = json.dumps(self.indexing_dict)           # change dict to string json
+        json_file = open("indexing.json", "w+")             # open file to write
+        json_file.write(json_str)                           # write in file
+        json_file.close()                                   # close file
         print "complete : save_to_json_file : SpiderModelIndexing"
         return json_str
 
